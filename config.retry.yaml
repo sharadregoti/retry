@@ -1,0 +1,3 @@
+retries: 3
+sleep: "10s"
+regex: ["hello", "connection refused"]

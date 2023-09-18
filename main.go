@@ -82,7 +82,7 @@ func NewCommand() *cobra.Command {
 				finalArgs = args[1:]
 			}
 
-			fmt.Println("Executing command in retriable CLI...")
+			fmt.Println("Executing command in Retry CLI...", conf)
 			return executeCommand(command, finalArgs, conf)
 		},
 	}
@@ -112,9 +112,13 @@ func executeCommand(command string, args []string, configOption AppConfig) error
 	}
 
 	var err error
+	var isMatched bool
 	for i := 0; i < configOption.Retries; i++ {
-		err = runCommand(command, configOption.Regex, args...)
+		isMatched, err = runCommand(command, configOption.Regex, args...)
 		if err == nil {
+			break
+		}
+		if !isMatched {
 			break
 		}
 
@@ -123,21 +127,20 @@ func executeCommand(command string, args []string, configOption AppConfig) error
 	}
 
 	if err != nil {
-		fmt.Println("Command execution failed after retries.")
+		fmt.Println("Retry CLI: Command execution failed with", err)
 		os.Exit(1)
 	}
 
 	return nil
 }
 
-func runCommand(name string, matchPatterns []string, args ...string) error {
+func runCommand(name string, matchPatterns []string, args ...string) (bool, error) {
 	cmd := exec.Command(name, args...)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
 	err := cmd.Run()
-
 	if exitError, ok := err.(*exec.ExitError); ok {
 		if exitError.ExitCode() == 1 {
 			matched := false
@@ -145,7 +148,7 @@ func runCommand(name string, matchPatterns []string, args ...string) error {
 				matched, _ = regexp.MatchString(matchPattern, stdout.String())
 				if matched {
 					fmt.Println(stdout.String()) // print the output for debugging
-					return err
+					return matched, err
 				}
 			}
 		}
@@ -153,5 +156,5 @@ func runCommand(name string, matchPatterns []string, args ...string) error {
 
 	// Print output if not matched
 	fmt.Println(stdout.String())
-	return nil
+	return false, err
 }
