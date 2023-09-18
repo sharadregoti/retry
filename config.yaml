@@ -1,0 +1,10 @@
+# Set max retries: Default 10
+retries: 3
+# Constant sleep amount (seconds)
+sleep: "10s"
+#
+regex: [""]
+# Exponential Backoff: minimum sleep amount (seconds): Default 0.3
+min: ""
+# Exponential Backoff: maximum sleep amount (seconds): Default 60
+max: ""
