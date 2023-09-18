@@ -3,7 +3,7 @@ retries: 3
 # Constant sleep amount (seconds)
 sleep: "10s"
 #
-regex: [""]
+regex: ["hello", "connection refused"]
 # Exponential Backoff: minimum sleep amount (seconds): Default 0.3
 min: ""
 # Exponential Backoff: maximum sleep amount (seconds): Default 60
